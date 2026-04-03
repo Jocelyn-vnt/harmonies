@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🌿 Harmonies — Décompte des points</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f0e8;--bg-warm:#ede6d6;
+  --card:#fffdf7;--card-shadow:rgba(120,100,60,0.08);
+  --green-tree:#5a8a4a;--green-leaf:#8bc34a;--green-soft:#e8f5e0;
+  --brown:#8d6e4a;--brown-light:#c4a882;
+  --grey-mountain:#7a8a9a;--grey-light:#d0dae4;
+  --yellow-field:#e8c840;--yellow-soft:#fdf6d8;
+  --red-build:#c75050;--red-soft:#fce8e8;
+  --blue-water:#5090c0;--blue-soft:#e0f0fa;
+  --orange-animal:#e08040;--orange-soft:#fef0e0;
+  --purple-spirit:#8868a8;--purple-soft:#f0e8f8;
+  --ink:#2a2420;--ink-mid:#5a4a3a;--ink-light:#8a7a68;--ink-faded:#b0a090;
+  --accent:#4a7a3a;
+}
+body{
+  font-family:'Quicksand',sans-serif;color:var(--ink);
+  min-height:100vh;-webkit-tap-highlight-color:transparent;
+  background:var(--bg);
+  background-image:
+    radial-gradient(ellipse at 20% 10%,rgba(139,195,74,0.06) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 90%,rgba(80,144,192,0.05) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 50%,rgba(232,200,64,0.03) 0%,transparent 60%);
+}
+.container{max-width:540px;margin:0 auto;padding:16px 12px}
+
+/* Header */
+.header{text-align:center;margin-bottom:20px;padding:16px 0 8px}
+.header-icon{font-size:44px;line-height:1;margin-bottom:4px}
+.title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:36px;font-weight:700;color:var(--accent);
+  letter-spacing:0.02em;
+}
+.subtitle{font-size:13px;color:var(--ink-light);margin-top:2px;font-weight:500;letter-spacing:0.04em}
+
+/* Cards */
+.card{
+  background:var(--card);border:1px solid rgba(0,0,0,0.06);
+  border-radius:16px;padding:20px;margin-bottom:14px;
+  box-shadow:0 2px 12px var(--card-shadow);position:relative;
+}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.player-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:24px;font-weight:700;color:var(--ink);
+}
+.player-total{
+  font-family:'JetBrains Mono',monospace;
+  font-size:20px;font-weight:700;color:var(--accent);
+}
+.section-icon{font-size:18px;margin-right:6px}
+.section-title{
+  font-weight:700;font-size:14px;color:var(--ink-mid);
+  display:flex;align-items:center;margin-bottom:10px;
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+
+/* Scoring rows */
+.score-section{
+  padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.04);
+}
+.score-section:last-child{border-bottom:none}
+.score-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 0;font-size:14px;
+}
+.score-row-label{color:var(--ink-mid);flex:1}
+.score-row-pts{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:13px;min-width:40px;text-align:right;color:var(--ink-light);
+}
+.counter-row{display:flex;align-items:center;gap:10px}
+.counter-btn{
+  width:32px;height:32px;border-radius:50%;border:1.5px solid rgba(0,0,0,0.1);
+  background:rgba(0,0,0,0.02);font-size:16px;font-weight:700;
+  cursor:pointer;color:var(--ink-mid);display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+}
+.counter-btn:active{transform:scale(0.9);background:rgba(0,0,0,0.06)}
+.counter-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;font-weight:700;min-width:24px;text-align:center;color:var(--ink);
+}
+
+/* Color chips for sections */
+.chip{
+  display:inline-block;width:10px;height:10px;border-radius:3px;
+  margin-right:6px;vertical-align:middle;
+}
+.chip-green{background:var(--green-tree)}
+.chip-grey{background:var(--grey-mountain)}
+.chip-yellow{background:var(--yellow-field)}
+.chip-red{background:var(--red-build)}
+.chip-blue{background:var(--blue-water)}
+.chip-orange{background:var(--orange-animal)}
+.chip-purple{background:var(--purple-spirit)}
+
+/* River slider */
+.river-row{display:flex;align-items:center;gap:12px;margin-top:6px}
+.river-slider{
+  flex:1;-webkit-appearance:none;appearance:none;height:6px;
+  border-radius:3px;background:var(--blue-soft);outline:none;
+}
+.river-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--blue-water);cursor:pointer;border:2px solid #fff;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+.river-val{
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;
+  min-width:24px;text-align:center;color:var(--blue-water);
+}
+
+/* Free input */
+.free-input{
+  width:70px;padding:6px 8px;border:1.5px solid rgba(0,0,0,0.1);
+  border-radius:8px;font-size:15px;text-align:center;outline:none;
+  font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink);
+  background:rgba(0,0,0,0.02);
+}
+.free-input:focus{border-color:var(--accent)}
+
+/* Buttons */
+.label{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:700;color:var(--accent);
+  margin-bottom:10px;display:block;
+}
+.small-label{
+  font-size:11px;font-weight:700;color:var(--ink-light);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:0.08em;
+}
+.input{
+  width:100%;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.08);
+  border-radius:10px;font-size:15px;outline:none;color:var(--ink);
+  background:rgba(0,0,0,0.02);font-family:'Quicksand',sans-serif;
+}
+.input:focus{border-color:var(--accent)}
+.counter-btn-setup{
+  width:44px;height:44px;border-radius:12px;border:1.5px solid rgba(0,0,0,0.1);
+  background:var(--card);font-size:20px;font-weight:700;cursor:pointer;
+  color:var(--accent);display:flex;align-items:center;justify-content:center;
+}
+.counter-val-setup{
+  font-family:'JetBrains Mono',monospace;
+  font-size:30px;font-weight:700;min-width:40px;text-align:center;color:var(--accent);
+}
+.primary-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),#3a6a2a);
+  color:#fff;font-size:16px;font-weight:700;cursor:pointer;
+  margin-top:20px;font-family:'Quicksand',sans-serif;
+  box-shadow:0 4px 15px rgba(74,122,58,0.25);letter-spacing:0.02em;
+}
+.primary-btn:active{transform:scale(0.98)}
+.secondary-btn{
+  flex:1;padding:14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:14px;
+  background:var(--card);color:var(--ink-mid);font-size:15px;font-weight:600;
+  cursor:pointer;font-family:'Quicksand',sans-serif;
+}
+.btn-row{display:flex;gap:12px;margin-top:12px}
+
+/* Results */
+.result-card{
+  border-radius:16px;padding:20px;margin-bottom:12px;
+  border:1px solid rgba(0,0,0,0.06);
+  box-shadow:0 2px 12px var(--card-shadow);
+}
+.result-card.first{background:linear-gradient(135deg,#f8f4e0,#f0ead0);border-color:rgba(200,170,60,0.25)}
+.result-card.second{background:var(--card)}
+.result-card.third{background:var(--card)}
+.result-rank{font-size:24px;margin-right:12px}
+.result-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:700;flex:1;
+}
+.result-score{
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;font-weight:700;color:var(--accent);
+}
+.result-row{display:flex;align-items:center;margin-bottom:4px}
+.result-detail{font-size:12px;color:var(--ink-light);padding-left:38px}
+.mini-scoreboard{
+  display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;
+}
+.mini-item{
+  flex:1;min-width:60px;text-align:center;
+  background:var(--card);border:1px solid rgba(0,0,0,0.06);
+  border-radius:10px;padding:8px 6px;
+}
+.mini-item-name{font-size:10px;color:var(--ink-light);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-item-score{
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;font-weight:700;color:var(--accent);
+}
+
+/* Tab navigation */
+.tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;flex-wrap:nowrap}
+.tab{
+  flex:1;min-width:0;padding:10px 4px;border:none;border-radius:10px;
+  background:rgba(0,0,0,0.03);font-size:12px;font-weight:700;
+  cursor:pointer;color:var(--ink-light);text-align:center;
+  font-family:'Quicksand',sans-serif;transition:all 0.2s;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(74,122,58,0.2)}
+</style>
+</head>
+<body>
+<div class="container" id="app"></div>
+<script>
+const RIVER_POINTS=[0,0,2,5,8,11,15,19,23,27,31,35,39,43,47,51,55,59,63,67];
+const TREE_PTS=[0,1,3,7];
+const MT_PTS=[0,1,3,7];
+
+let S={
+  phase:'setup',playerCount:2,
+  playerNames:['Joueur 1','Joueur 2','Joueur 3','Joueur 4'],
+  activeTab:0,
+  data:[]
+};
+
+function freshData(){return{
+  trees:[0,0,0],// count of size 1,2,3
+  mountains:[0,0,0],
+  fields:0,buildings:0,
+  riverLength:0,
+  animals:0,spirits:0
+};}
+
+function calcPlayer(d){
+  const treesPts=d.trees[0]*TREE_PTS[1]+d.trees[1]*TREE_PTS[2]+d.trees[2]*TREE_PTS[3];
+  const mtPts=d.mountains[0]*MT_PTS[1]+d.mountains[1]*MT_PTS[2]+d.mountains[2]*MT_PTS[3];
+  const fieldsPts=d.fields*5;
+  const buildPts=d.buildings*5;
+  const riverPts=d.riverLength<RIVER_POINTS.length?RIVER_POINTS[d.riverLength]:RIVER_POINTS[RIVER_POINTS.length-1]+((d.riverLength-(RIVER_POINTS.length-1))*4);
+  const animalPts=d.animals||0;
+  const spiritPts=d.spirits||0;
+  return{treesPts,mtPts,fieldsPts,buildPts,riverPts,animalPts,spiritPts,
+    total:treesPts+mtPts+fieldsPts+buildPts+riverPts+animalPts+spiritPts};
+}
+
+function activeNames(){return S.playerNames.slice(0,S.playerCount);}
+
+function startGame(){
+  S.data=activeNames().map(()=>freshData());
+  S.activeTab=0;S.phase='score';render();
+}
+function showResults(){S.phase='results';render();}
+function resetGame(){S.phase='setup';S.data=[];S.activeTab=0;render();}
+
+function h(t,a,...c){const el=document.createElement(t);if(a)Object.entries(a).forEach(([k,v])=>{if(k==='className')el.className=v;else if(k.startsWith('on'))el.addEventListener(k.slice(2).toLowerCase(),v);else if(k==='disabled'){if(v)el.setAttribute('disabled','');}else if(k==='innerHTML')el.innerHTML=v;else el.setAttribute(k,v);});c.flat().forEach(x=>{if(x!=null)el.appendChild(typeof x==='string'?document.createTextNode(x):x);});return el;}
+
+function render(){const app=document.getElementById('app');app.innerHTML='';
+  if(S.phase==='setup')renderSetup(app);
+  else if(S.phase==='results')renderResults(app);
+  else renderScore(app);
+}
+
+function renderSetup(app){
+  app.appendChild(h('div',{className:'header'},
+    h('div',{className:'header-icon'},'🌿'),
+    h('h1',{className:'title'},'Harmonies'),
+    h('p',{className:'subtitle'},'Décompte des points')
+  ));
+  const card=h('div',{className:'card'});
+  card.appendChild(h('label',{className:'label'},'Nombre de joueurs'));
+  card.appendChild(h('div',{className:'counter-row',style:'justify-content:center;gap:20px'},
+    h('button',{className:'counter-btn-setup',onClick:()=>{S.playerCount=Math.max(1,S.playerCount-1);render();}},'−'),
+    h('span',{className:'counter-val-setup'},''+S.playerCount),
+    h('button',{className:'counter-btn-setup',onClick:()=>{S.playerCount=Math.min(4,S.playerCount+1);render();}},'+')
+  ));
+  const inputs=h('div',{style:'margin-top:24px'});
+  for(let i=0;i<S.playerCount;i++){
+    const idx=i;const w=h('div',{style:'margin-bottom:12px'});
+    w.appendChild(h('label',{className:'small-label'},'🌱 Joueur '+(i+1)));
+    const inp=h('input',{className:'input',value:S.playerNames[i]});
+    inp.addEventListener('input',e=>{S.playerNames[idx]=e.target.value;});
+    w.appendChild(inp);inputs.appendChild(w);
+  }
+  card.appendChild(inputs);
+  card.appendChild(h('button',{className:'primary-btn',onClick:startGame},'🌿 Commencer le décompte'));
+  app.appendChild(card);
+}
+
+function renderScore(app){
+  const names=activeNames();
+  app.appendChild(h('div',{className:'header'},
+    h('div',{className:'header-icon'},'🌿'),
+    h('h1',{className:'title'},'Harmonies'),
+    h('p',{className:'subtitle'},'Décompte des points')
+  ));
+
+  // Mini scoreboard
+  const ms=h('div',{className:'mini-scoreboard'});
+  names.forEach((n,i)=>{
+    const sc=calcPlayer(S.data[i]);
+    ms.appendChild(h('div',{className:'mini-item'},
+      h('div',{className:'mini-item-name'},n),
+      h('div',{className:'mini-item-score'},''+sc.total)
+    ));
+  });
+  app.appendChild(ms);
+
+  // Tabs
+  const tabs=h('div',{className:'tabs'});
+  names.forEach((n,i)=>{
+    tabs.appendChild(h('button',{className:'tab'+(S.activeTab===i?' active':''),onClick:()=>{S.activeTab=i;render();}},n));
+  });
+  app.appendChild(tabs);
+
+  // Active player scoring card
+  const pi=S.activeTab;const d=S.data[pi];const sc=calcPlayer(d);
+
+  const card=h('div',{className:'card'});
+  card.appendChild(h('div',{className:'card-header'},
+    h('span',{className:'player-name'},names[pi]),
+    h('span',{className:'player-total'},sc.total+' pts')
+  ));
+
+  // 🌲 Trees
+  const treeSec=h('div',{className:'score-section'});
+  treeSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-green'}),'🌲 Arbres'));
+  [['Buisson (1 niv.)','1 pt',0],['Arbuste (2 niv.)','3 pts',1],['Grand arbre (3 niv.)','7 pts',2]].forEach(([label,pts,idx])=>{
+    treeSec.appendChild(h('div',{className:'score-row'},
+      h('span',{className:'score-row-label'},label),
+      h('span',{className:'score-row-pts'},pts),
+      h('div',{className:'counter-row'},
+        h('button',{className:'counter-btn',onClick:()=>{d.trees[idx]=Math.max(0,d.trees[idx]-1);render();}},'−'),
+        h('span',{className:'counter-val'},''+d.trees[idx]),
+        h('button',{className:'counter-btn',onClick:()=>{d.trees[idx]++;render();}},'+')
+      )
+    ));
+  });
+  treeSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--green-tree);font-weight:700;margin-top:4px'},'= '+sc.treesPts+' pts'));
+  card.appendChild(treeSec);
+
+  // ⛰️ Mountains
+  const mtSec=h('div',{className:'score-section'});
+  mtSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-grey'}),'⛰️ Montagnes'));
+  [['Colline (1 niv.)','1 pt',0],['Montagne (2 niv.)','3 pts',1],['Sommet (3 niv.)','7 pts',2]].forEach(([label,pts,idx])=>{
+    mtSec.appendChild(h('div',{className:'score-row'},
+      h('span',{className:'score-row-label'},label),
+      h('span',{className:'score-row-pts'},pts),
+      h('div',{className:'counter-row'},
+        h('button',{className:'counter-btn',onClick:()=>{d.mountains[idx]=Math.max(0,d.mountains[idx]-1);render();}},'−'),
+        h('span',{className:'counter-val'},''+d.mountains[idx]),
+        h('button',{className:'counter-btn',onClick:()=>{d.mountains[idx]++;render();}},'+')
+      )
+    ));
+  });
+  mtSec.appendChild(h('div',{style:'text-align:right;font-size:12px;color:var(--ink-faded);font-style:italic;margin-top:2px'},'⚠ Isolées = 0 pt'));
+  mtSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--grey-mountain);font-weight:700;margin-top:2px'},'= '+sc.mtPts+' pts'));
+  card.appendChild(mtSec);
+
+  // 🌾 Fields
+  const fSec=h('div',{className:'score-section'});
+  fSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-yellow'}),'🌾 Champs'));
+  fSec.appendChild(h('div',{className:'score-row'},
+    h('span',{className:'score-row-label'},'Groupes de ≥2 jaunes'),
+    h('span',{className:'score-row-pts'},'5 pts/grp'),
+    h('div',{className:'counter-row'},
+      h('button',{className:'counter-btn',onClick:()=>{d.fields=Math.max(0,d.fields-1);render();}},'−'),
+      h('span',{className:'counter-val'},''+d.fields),
+      h('button',{className:'counter-btn',onClick:()=>{d.fields++;render();}},'+')
+    )
+  ));
+  fSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:#b8a020;font-weight:700;margin-top:4px'},'= '+sc.fieldsPts+' pts'));
+  card.appendChild(fSec);
+
+  // 🏠 Buildings
+  const bSec=h('div',{className:'score-section'});
+  bSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-red'}),'🏠 Bâtiments'));
+  bSec.appendChild(h('div',{className:'score-row'},
+    h('span',{className:'score-row-label'},'Entourés ≥3 couleurs'),
+    h('span',{className:'score-row-pts'},'5 pts/bât'),
+    h('div',{className:'counter-row'},
+      h('button',{className:'counter-btn',onClick:()=>{d.buildings=Math.max(0,d.buildings-1);render();}},'−'),
+      h('span',{className:'counter-val'},''+d.buildings),
+      h('button',{className:'counter-btn',onClick:()=>{d.buildings++;render();}},'+')
+    )
+  ));
+  bSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--red-build);font-weight:700;margin-top:4px'},'= '+sc.buildPts+' pts'));
+  card.appendChild(bSec);
+
+  // 💧 River
+  const rSec=h('div',{className:'score-section'});
+  rSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-blue'}),'💧 Rivière (Face A)'));
+  rSec.appendChild(h('div',{style:'font-size:13px;color:var(--ink-light);margin-bottom:8px'},'Plus court chemin de votre plus longue rivière'));
+  const rRow=h('div',{className:'river-row'});
+  const slider=h('input',{className:'river-slider',type:'range',min:'0',max:'15',value:''+d.riverLength});
+  slider.addEventListener('input',e=>{d.riverLength=parseInt(e.target.value);render();});
+  rRow.appendChild(slider);
+  rRow.appendChild(h('span',{className:'river-val'},''+d.riverLength));
+  rSec.appendChild(rRow);
+  rSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--blue-water);font-weight:700;margin-top:6px'},'= '+sc.riverPts+' pts'));
+  card.appendChild(rSec);
+
+  // 🦊 Animals
+  const aSec=h('div',{className:'score-section'});
+  aSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-orange'}),'🦊 Cartes Animal'));
+  aSec.appendChild(h('div',{style:'font-size:13px;color:var(--ink-light);margin-bottom:8px'},'Total des points de vos cartes'));
+  const aInp=h('input',{className:'free-input',type:'number',min:'0',value:''+(d.animals||0)});
+  aInp.addEventListener('input',e=>{d.animals=parseInt(e.target.value)||0;render();});
+  aSec.appendChild(h('div',{style:'display:flex;align-items:center;gap:10px'},
+    aInp,h('span',{style:'font-size:13px;color:var(--orange-animal);font-weight:700'},'pts')
+  ));
+  card.appendChild(aSec);
+
+  // 🌿 Spirits
+  const sSec=h('div',{className:'score-section'});
+  sSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-purple'}),'🌿 Esprit de la nature'));
+  const sInp=h('input',{className:'free-input',type:'number',min:'0',value:''+(d.spirits||0)});
+  sInp.addEventListener('input',e=>{d.spirits=parseInt(e.target.value)||0;render();});
+  sSec.appendChild(h('div',{style:'display:flex;align-items:center;gap:10px'},
+    sInp,h('span',{style:'font-size:13px;color:var(--purple-spirit);font-weight:700'},'pts')
+  ));
+  card.appendChild(sSec);
+
+  app.appendChild(card);
+
+  // Navigation
+  const nav=h('div',{className:'btn-row'});
+  if(pi>0) nav.appendChild(h('button',{className:'secondary-btn',onClick:()=>{S.activeTab--;render();}},'← Précédent'));
+  if(pi<names.length-1) nav.appendChild(h('button',{className:'primary-btn',style:'margin-top:0',onClick:()=>{S.activeTab++;render();}},'Suivant →'));
+  else nav.appendChild(h('button',{className:'primary-btn',style:'margin-top:0',onClick:showResults},'🏆 Voir les résultats'));
+  app.appendChild(nav);
+}
+
+function renderResults(app){
+  const names=activeNames();
+  const results=names.map((n,i)=>({name:n,idx:i,...calcPlayer(S.data[i])}));
+  results.sort((a,b)=>b.total-a.total);
+
+  app.appendChild(h('div',{className:'header'},
+    h('div',{className:'header-icon'},'🏆'),
+    h('h1',{className:'title'},'Résultats'),
+    h('p',{className:'subtitle'},'Qui a créé la plus belle harmonie ?')
+  ));
+
+  results.forEach((r,i)=>{
+    const cls='result-card'+(i===0?' first':i===1?' second':i===2?' third':'');
+    const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    const card=h('div',{className:cls});
+    card.appendChild(h('div',{className:'result-row'},
+      h('span',{className:'result-rank'},rank||(i+1)+'.'),
+      h('span',{className:'result-name'},r.name),
+      h('span',{className:'result-score'},r.total+' pts')
+    ));
+    const details=[
+      ['🌲',r.treesPts],['⛰️',r.mtPts],['🌾',r.fieldsPts],
+      ['🏠',r.buildPts],['💧',r.riverPts],['🦊',r.animalPts],['🌿',r.spiritPts]
+    ].filter(([,v])=>v>0).map(([icon,v])=>icon+' '+v).join('  ·  ');
+    if(details) card.appendChild(h('div',{className:'result-detail'},details));
+    app.appendChild(card);
+  });
+
+  // Detail table
+  const tc=h('div',{className:'card',style:'overflow-x:auto;margin-top:8px'});
+  tc.appendChild(h('div',{className:'section-title',style:'font-family:Cormorant Garamond,serif;font-size:20px;color:var(--accent)'},'📊 Détail'));
+  let t='<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:8px 6px;border-bottom:2px solid rgba(0,0,0,0.08);font-size:11px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.06em"></th>';
+  names.forEach(n=>t+='<th style="text-align:center;padding:8px 4px;border-bottom:2px solid rgba(0,0,0,0.08);font-size:11px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.04em">'+n+'</th>');
+  t+='</tr></thead><tbody>';
+  const cats=[['🌲 Arbres','treesPts'],['⛰️ Montagnes','mtPts'],['🌾 Champs','fieldsPts'],['🏠 Bâtiments','buildPts'],['💧 Rivière','riverPts'],['🦊 Animaux','animalPts'],['🌿 Esprits','spiritPts']];
+  cats.forEach(([label,key])=>{
+    t+='<tr><td style="padding:6px;font-size:13px;color:var(--ink-mid)">'+label+'</td>';
+    names.forEach((_,i)=>{
+      const v=calcPlayer(S.data[i])[key];
+      t+='<td style="text-align:center;padding:6px;font-family:JetBrains Mono,monospace;font-weight:600;color:'+(v>0?'var(--ink)':'var(--ink-faded)')+'">'+v+'</td>';
+    });
+    t+='</tr>';
+  });
+  t+='<tr style="border-top:2px solid rgba(0,0,0,0.08)"><td style="padding:8px 6px;font-weight:700;color:var(--accent)">Total</td>';
+  names.forEach((_,i)=>{const v=calcPlayer(S.data[i]).total;t+='<td style="text-align:center;padding:8px 4px;font-family:JetBrains Mono,monospace;font-weight:700;font-size:15px;color:var(--accent)">'+v+'</td>';});
+  t+='</tr></tbody></table>';
+  tc.innerHTML+=t;
+  app.appendChild(tc);
+
+  app.appendChild(h('div',{className:'btn-row'},
+    h('button',{className:'secondary-btn',onClick:()=>{S.phase='score';render();}},'← Modifier'),
+    h('button',{className:'primary-btn',style:'margin-top:0',onClick:resetGame},'🌿 Nouvelle partie')
+  ));
+}
+
+render();
+</script>
+</body>
+</html>
