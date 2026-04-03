@@ -234,7 +234,8 @@ function freshData(){return{
   mountains:[0,0,0],
   fields:0,buildings:0,
   riverLength:0,
-  animals:0,spirits:0
+  animalCards:[],spiritCards:[],
+  animalDraft:0,spiritDraft:0
 };}
 
 function calcPlayer(d){
@@ -243,8 +244,8 @@ function calcPlayer(d){
   const fieldsPts=d.fields*5;
   const buildPts=d.buildings*5;
   const riverPts=d.riverLength<RIVER_POINTS.length?RIVER_POINTS[d.riverLength]:RIVER_POINTS[RIVER_POINTS.length-1]+((d.riverLength-(RIVER_POINTS.length-1))*4);
-  const animalPts=d.animals||0;
-  const spiritPts=d.spirits||0;
+  const animalPts=d.animalCards.reduce((s,v)=>s+v,0);
+  const spiritPts=d.spiritCards.reduce((s,v)=>s+v,0);
   return{treesPts,mtPts,fieldsPts,buildPts,riverPts,animalPts,spiritPts,
     total:treesPts+mtPts+fieldsPts+buildPts+riverPts+animalPts+spiritPts};
 }
@@ -405,25 +406,56 @@ function renderScore(app){
   rSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--blue-water);font-weight:700;margin-top:6px'},'= '+sc.riverPts+' pts'));
   card.appendChild(rSec);
 
-  // 🦊 Animals
+  // 🦊 Animals — card calculator
   const aSec=h('div',{className:'score-section'});
   aSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-orange'}),'🦊 Cartes Animal'));
-  aSec.appendChild(h('div',{style:'font-size:13px;color:var(--ink-light);margin-bottom:8px'},'Total des points de vos cartes'));
-  const aInp=h('input',{className:'free-input',type:'number',min:'0',value:''+(d.animals||0)});
-  aInp.addEventListener('input',e=>{d.animals=parseInt(e.target.value)||0;render();});
-  aSec.appendChild(h('div',{style:'display:flex;align-items:center;gap:10px'},
-    aInp,h('span',{style:'font-size:13px;color:var(--orange-animal);font-weight:700'},'pts')
-  ));
+  // List existing cards
+  if(d.animalCards.length>0){
+    const aList=h('div',{style:'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px'});
+    d.animalCards.forEach((v,ci)=>{
+      const tag=h('div',{style:'display:flex;align-items:center;gap:4px;background:var(--orange-soft);border:1px solid rgba(224,128,64,0.2);border-radius:8px;padding:4px 8px 4px 10px;font-size:13px;font-weight:600;color:var(--orange-animal)'},
+        document.createTextNode(v+' pts'),
+        h('button',{style:'width:18px;height:18px;border:none;background:rgba(0,0,0,0.08);border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-light)',onClick:()=>{d.animalCards.splice(ci,1);render();}},'✕')
+      );
+      aList.appendChild(tag);
+    });
+    aSec.appendChild(aList);
+  }
+  // Add card input
+  const aAddRow=h('div',{style:'display:flex;align-items:center;gap:8px'});
+  const aAddInp=h('input',{className:'free-input',type:'number',min:'0',value:''+(d.animalDraft||''),placeholder:'pts'});
+  aAddInp.addEventListener('input',e=>{d.animalDraft=parseInt(e.target.value)||0;});
+  aAddRow.appendChild(aAddInp);
+  aAddRow.appendChild(h('button',{style:'padding:6px 14px;border:1.5px solid var(--orange-animal);border-radius:8px;background:var(--orange-soft);color:var(--orange-animal);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap',onClick:()=>{
+    if(d.animalDraft>0){d.animalCards.push(d.animalDraft);d.animalDraft=0;render();}
+  }},'+ Ajouter'));
+  aSec.appendChild(aAddRow);
+  aSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--orange-animal);font-weight:700;margin-top:8px'},'= '+sc.animalPts+' pts ('+d.animalCards.length+' carte'+(d.animalCards.length>1?'s':'')+')'));
   card.appendChild(aSec);
 
-  // 🌿 Spirits
+  // 🌿 Spirits — card calculator
   const sSec=h('div',{className:'score-section'});
   sSec.appendChild(h('div',{className:'section-title'},h('span',{className:'chip chip-purple'}),'🌿 Esprit de la nature'));
-  const sInp=h('input',{className:'free-input',type:'number',min:'0',value:''+(d.spirits||0)});
-  sInp.addEventListener('input',e=>{d.spirits=parseInt(e.target.value)||0;render();});
-  sSec.appendChild(h('div',{style:'display:flex;align-items:center;gap:10px'},
-    sInp,h('span',{style:'font-size:13px;color:var(--purple-spirit);font-weight:700'},'pts')
-  ));
+  if(d.spiritCards.length>0){
+    const sList=h('div',{style:'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px'});
+    d.spiritCards.forEach((v,ci)=>{
+      const tag=h('div',{style:'display:flex;align-items:center;gap:4px;background:var(--purple-soft);border:1px solid rgba(136,104,168,0.2);border-radius:8px;padding:4px 8px 4px 10px;font-size:13px;font-weight:600;color:var(--purple-spirit)'},
+        document.createTextNode(v+' pts'),
+        h('button',{style:'width:18px;height:18px;border:none;background:rgba(0,0,0,0.08);border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-light)',onClick:()=>{d.spiritCards.splice(ci,1);render();}},'✕')
+      );
+      sList.appendChild(tag);
+    });
+    sSec.appendChild(sList);
+  }
+  const sAddRow=h('div',{style:'display:flex;align-items:center;gap:8px'});
+  const sAddInp=h('input',{className:'free-input',type:'number',min:'0',value:''+(d.spiritDraft||''),placeholder:'pts'});
+  sAddInp.addEventListener('input',e=>{d.spiritDraft=parseInt(e.target.value)||0;});
+  sAddRow.appendChild(sAddInp);
+  sAddRow.appendChild(h('button',{style:'padding:6px 14px;border:1.5px solid var(--purple-spirit);border-radius:8px;background:var(--purple-soft);color:var(--purple-spirit);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap',onClick:()=>{
+    if(d.spiritDraft>0){d.spiritCards.push(d.spiritDraft);d.spiritDraft=0;render();}
+  }},'+ Ajouter'));
+  sSec.appendChild(sAddRow);
+  sSec.appendChild(h('div',{style:'text-align:right;font-size:13px;color:var(--purple-spirit);font-weight:700;margin-top:8px'},'= '+sc.spiritPts+' pts'));
   card.appendChild(sSec);
 
   app.appendChild(card);
